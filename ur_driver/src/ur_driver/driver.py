@@ -339,8 +339,8 @@ class URConnectionRT(object):
         global last_joint_states, last_joint_states_lock
         now = rospy.get_rostime()
         stateRT = RobotStateRT.unpack(buf)
-        if(not stateRT.time):
-            return
+        #if(not stateRT.time):
+        #    return
         self.last_stateRT = stateRT
 
         msg = JointState()
