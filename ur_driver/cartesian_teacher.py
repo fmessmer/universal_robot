@@ -14,10 +14,8 @@ from tf_conversions import posemath
 import numpy
 from tf import transformations
 
-base_frame = "ur_base_link"
-tool_frame = "ee_link"
-#base_frame = "ur_base_link"
-#tool_frame = "ur_ee_link"
+base_frame = "base"  #"ur_base_link"
+tool_frame = "tool0" #"ee_link"
 
 
 def xyz_to_mat44(pos):
