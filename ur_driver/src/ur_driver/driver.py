@@ -677,18 +677,18 @@ class URCartTrajectory(object):
         self.cart_traj = goal_handle
         #print "Trigger_movel"
         for pose in self.cart_traj.poses:
-            if(goal_handle.header.frame_id == "ur_base_link"):
+            if(goal_handle.header.frame_id == "base"): #ur_base_link
                 p_ur_bl = pose
             else:
                 ps = PoseStamped()
                 ps.header = copy.deepcopy(goal_handle.header)
                 ps.header.stamp = rospy.Time(0)
                 ps.pose = copy.deepcopy(pose)
-                ps_ur_bl = self.tfl.transformPose("ur_base_link", ps)
+                ps_ur_bl = self.tfl.transformPose("base", ps) #ur_base_link
                 p_ur_bl = ps_ur_bl.pose
                 #print p_ur_bl
 
-            # (trans_ur_ee_ee, rot_ur_ee_ee) = self.tfl.lookupTransform("ur_ee_link", "ee_link", ps.header.stamp)
+            # (trans_ur_ee_ee, rot_ur_ee_ee) = self.tfl.lookupTransform("tool0", "ee_link", ps.header.stamp) #ur_ee_link
             # rot_mat_ur_ee_ee   = tf.transformations.quaternion_matrix(rot_ur_ee_ee)
             # rot_mat_ee_link    = tf.transformations.quaternion_matrix([p_ur_bl.orientation.x, p_ur_bl.orientation.y, p_ur_bl.orientation.z, p_ur_bl.orientation.w])
             # rot_mat_ur_ee_bl = numpy.dot(rot_mat_ur_ee_ee, rot_mat_ee_link)
