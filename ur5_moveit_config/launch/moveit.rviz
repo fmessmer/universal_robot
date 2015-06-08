@@ -1,12 +1,13 @@
 Panels:
   - Class: rviz/Displays
-    Help Height: 84
+    Help Height: 0
     Name: Displays
     Property Tree Widget:
       Expanded:
         - /MotionPlanning1
+        - /MotionPlanning1/Planned Path1
       Splitter Ratio: 0.74256
-    Tree Height: 291
+    Tree Height: 297
   - Class: rviz/Help
     Name: Help
   - Class: rviz/Views
@@ -39,8 +40,8 @@ Visualization Manager:
       Enabled: true
       Move Group Namespace: ""
       MoveIt_Goal_Tolerance: 0
+      MoveIt_Planning_Attempts: 0
       MoveIt_Planning_Time: 0
-      MoveIt_Planning_Attempts: 1
       MoveIt_Use_Constraint_Aware_IK: true
       MoveIt_Warehouse_Host: 127.0.0.1
       MoveIt_Warehouse_Port: 33829
@@ -61,6 +62,7 @@ Visualization Manager:
             Alpha: 1
             Show Axes: false
             Show Trail: false
+            Value: true
           forearm_link:
             Alpha: 1
             Show Axes: false
@@ -95,12 +97,12 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
-        Loop Animation: true
+        Loop Animation: false
         Robot Alpha: 0.5
         Show Robot Collision: false
         Show Robot Visual: true
         Show Trail: false
-        State Display Time: 0.05 s
+        State Display Time: REALTIME
         Trajectory Topic: /move_group/display_planned_path
       Planning Metrics:
         Payload: 1
@@ -147,6 +149,7 @@ Visualization Manager:
             Alpha: 1
             Show Axes: false
             Show Trail: false
+            Value: true
           forearm_link:
             Alpha: 1
             Show Axes: false
@@ -200,22 +203,22 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/XYOrbit
-      Distance: 2.9965
+      Distance: 1.98364
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.113567
-        Y: 0.10592
-        Z: 2.23518e-07
+        X: -0.132639
+        Y: 0.0417877
+        Z: 1.04309e-07
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 0.509797
+      Pitch: -0.0102029
       Target Frame: world
       Value: XYOrbit (rviz)
-      Yaw: 5.65995
+      Yaw: 5.14495
     Saved: ~
 Window Geometry:
   Displays:
@@ -227,7 +230,7 @@ Window Geometry:
   Hide Right Dock: false
   Motion Planning:
     collapsed: false
-  QMainWindow State: 000000ff00000000fd0000000100000000000002a20000031cfc0200000005fb000000100044006900730070006c0061007900730100000036000001b4000000b700fffffffb0000000800480065006c00700000000342000000bb0000006500fffffffb0000000a0056006900650077007300000003b0000000b00000009b00fffffffb0000000c00430061006d00650072006100000002ff000001610000000000000000fb0000001e004d006f00740069006f006e00200050006c0061006e006e0069006e006701000001f0000001620000015700ffffff000003570000031c00000001000000020000000100000002fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd0000000100000000000002b100000326fc0200000005fb000000100044006900730070006c00610079007301000000280000016a000000dd00fffffffb0000000800480065006c00700000000342000000bb0000007600fffffffb0000000a0056006900650077007300000003b0000000b0000000b000fffffffb0000000c00430061006d00650072006100000002ff000001610000000000000000fb0000001e004d006f00740069006f006e00200050006c0061006e006e0069006e00670100000198000001b6000001ab00ffffff000003480000032600000001000000020000000100000002fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Views:
     collapsed: false
   Width: 1535

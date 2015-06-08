@@ -11,10 +11,10 @@ import SocketServer
 
 import rospy
 import actionlib
-import tf
 import numpy
-from tf.transformations import *
+import tf
 import tf_conversions.posemath as pm
+from tf.transformations import *
 from sensor_msgs.msg import JointState
 from control_msgs.msg import FollowJointTrajectoryAction
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
@@ -215,7 +215,7 @@ class URConnection(object):
         # - Shall we have appropriate ur_msgs definitions in order to reflect MasterboardData, ToolData,...?
         ###
 
-        # Use information from the robot state packet to publish IOStates
+        # Use information from the robot state packet to publish IOStates        
         msg = IOStates()
         #gets digital in states
         for i in range(0, 10):
@@ -431,7 +431,7 @@ class CommanderTCPHandler(SocketServer.BaseRequestHandler):
                     raise EOF()
 
     def handle(self):
-        self.socket_lock = threading.Lock()
+        self.__socket_lock = threading.Lock()
         setConnectedRobot(self)
         print "Handling a request"
         try:
@@ -475,9 +475,23 @@ class CommanderTCPHandler(SocketServer.BaseRequestHandler):
             print "Connection closed (command):", ex
             setConnectedRobot(None)
 
+    def __send_message(self, data):
+        """
+        Send a message to the robot.
+
+        The message is given as a list of integers that will be packed
+        as 4 bytes each in network byte order (big endian).
+
+        A lock is acquired before sending the message to prevent race conditions.
+
+        :param data: list of int, the data to send
+        """
+        buf = struct.pack("!%ii" % len(data), *data)
+        with self.__socket_lock:
+            self.request.send(buf)
+
     def send_quit(self):
-        with self.socket_lock:
-            self.request.send(struct.pack("!i", MSG_QUIT))
+        self.__send_message([MSG_QUIT])
 
     def send_servoj(self, waypoint_id, q_actual, t):
         assert(len(q_actual) == 6)
@@ -487,61 +501,32 @@ class CommanderTCPHandler(SocketServer.BaseRequestHandler):
         params = [MSG_SERVOJ, waypoint_id] + \
                  [MULT_jointstate * qq for qq in q_robot] + \
                  [MULT_time * t]
-        buf = struct.pack("!%ii" % len(params), *params)
-        with self.socket_lock:
-            self.request.send(buf)
+        self.__send_message(params)
 
     #Experimental set_payload implementation
     def send_payload(self,payload):
-        buf = struct.pack('!ii', MSG_SET_PAYLOAD, payload * MULT_payload)
-        with self.socket_lock:
-            self.request.send(buf)
+        self.__send_message([MSG_SET_PAYLOAD, payload * MULT_payload])
 
     #Experimental set_digital_output implementation
     def set_digital_out(self, pinnum, value):
-        params = [MSG_SET_DIGITAL_OUT] + \
-                 [pinnum] + \
-                 [value]
-        buf = struct.pack("!%ii" % len(params), *params)
-        #print params
-        with self.socket_lock:
-            self.request.send(buf)
+        self.__send_message([MSG_SET_DIGITAL_OUT, pinnum, value])
         time.sleep(IO_SLEEP_TIME)
 
     def set_analog_out(self, pinnum, value):
-        params = [MSG_SET_ANALOG_OUT] + \
-                 [pinnum] + \
-                 [value * MULT_analog]
-        buf = struct.pack("!%ii" % len(params), *params)
-        #print params
-        with self.socket_lock:
-            self.request.send(buf)
+        self.__send_message([MSG_SET_ANALOG_OUT, pinnum, value * MULT_analog])
         time.sleep(IO_SLEEP_TIME)
 
     def set_tool_voltage(self, value):
-        params = [MSG_SET_TOOL_VOLTAGE] + \
-                 [value] + \
-                 [0]
-        buf = struct.pack("!%ii" % len(params), *params)
-        #print params
-        with self.socket_lock:
-            self.request.send(buf)
+        self.__send_message([MSG_SET_TOOL_VOLTAGE, value, 0])
         time.sleep(IO_SLEEP_TIME)
 
     def set_flag(self, pin, val):
-        params = [MSG_SET_FLAG] + \
-                 [pin] + \
-                 [val]
-        buf = struct.pack("!%ii" % len(params), *params)
-        #print params
-        with self.socket_lock:
-            self.request.send(buf)
+        self.__send_message([MSG_SET_FLAG, pin, val])
         #set_flag will fail if called too closely together--added delay
         time.sleep(IO_SLEEP_TIME)
 
     def send_stopj(self):
-        with self.socket_lock:
-            self.request.send(struct.pack("!i", MSG_STOPJ))
+        self.__send_message([MSG_STOPJ])
 
     def set_waypoint_finished_cb(self, cb):
         self.waypoint_finished_cb = cb
@@ -892,6 +877,7 @@ class URTrajectoryFollower(object):
 
             # Replaces the goal
             self.goal_handle = goal_handle
+            self.traj = goal_handle.get_goal().trajectory
             #print "self.traj:"
             #print self.traj.points
             #print "_________________________________________________________"
@@ -1038,12 +1024,8 @@ def main():
         rospy.logwarn("use_sim_time is set!!!")
 
     global prevent_programming
-    prevent_programming = rospy.get_param("prevent_programming", False)
     reconfigure_srv = Server(URDriverConfig, reconfigure_callback)
-    ## Still use parameter server?
-    #update = URDriverConfig(prevent_programming)
-    #reconfigure_srv.update_configuration(update)
-
+    
     prefix = rospy.get_param("~prefix", "")
     print "Setting prefix to %s" % prefix
     global joint_names
@@ -1113,7 +1095,13 @@ def main():
             # Checks for disconnect
             if getConnectedRobot(wait=False):
                 time.sleep(0.2)
-                #prevent_programming = rospy.get_param("prevent_programming", False)
+                try:
+                    prevent_programming = rospy.get_param("~prevent_programming")
+                    update = {'prevent_programming': prevent_programming}
+                    reconfigure_srv.update_configuration(update)
+                except KeyError, ex:
+                    print "Parameter 'prevent_programming' not set. Value: " + str(prevent_programming)
+                    pass
                 if prevent_programming:
                     print "Programming now prevented"
                     connection.send_reset_program()
@@ -1130,7 +1118,13 @@ def main():
                     while not connection.ready_to_program():
                         print "Waiting to program"
                         time.sleep(1.0)
-                    #prevent_programming = rospy.get_param("prevent_programming", False)
+                    try:
+                        prevent_programming = rospy.get_param("~prevent_programming")
+                        update = {'prevent_programming': prevent_programming}
+                        reconfigure_srv.update_configuration(update)
+                    except KeyError, ex:
+                        print "Parameter 'prevent_programming' not set. Value: " + str(prevent_programming)
+                        pass
                     connection.send_program()
 
                     r = getConnectedRobot(wait=True, timeout=1.0)

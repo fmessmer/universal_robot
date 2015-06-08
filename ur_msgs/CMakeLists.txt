@@ -8,27 +8,27 @@ find_package(catkin REQUIRED COMPONENTS message_generation std_msgs geometry_msg
 
 
 ## Generate messages in the 'msg' folder
- add_message_files(
+add_message_files(
    FILES
    Analog.msg
    Digital.msg
    IOStates.msg
    RobotStateRTMsg.msg
    MasterboardDataMsg.msg
- )
+)
 
 ## Generate services in the 'srv' folder
- add_service_files(
+add_service_files(
    FILES
    SetPayload.srv
    SetIO.srv
- )
+)
 
  add_action_files(DIRECTORY action FILES FollowCartesianTrajectory.action)
 
 
 ## Generate added messages and services with any dependencies listed here
- generate_messages(
+generate_messages(
    DEPENDENCIES
    geometry_msgs
    std_msgs
