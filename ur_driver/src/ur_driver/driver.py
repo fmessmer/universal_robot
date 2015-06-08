@@ -502,6 +502,17 @@ class CommanderTCPHandler(SocketServer.BaseRequestHandler):
                  [MULT_jointstate * qq for qq in q_robot] + \
                  [MULT_time * t]
         self.__send_message(params)
+    
+    def send_movel(self, movel_speed, pos, rot):
+        params = [MSG_MOVEL] + \
+                 [MULT_jointstate * movel_speed] + \
+                 [MULT_jointstate * pos.x] + \
+                 [MULT_jointstate * pos.y] + \
+                 [MULT_jointstate * pos.z] + \
+                 [MULT_jointstate * rot[0]] + \
+                 [MULT_jointstate * rot[1]] + \
+                 [MULT_jointstate * rot[2]]
+        self.__send_message(params)
 
     #Experimental set_payload implementation
     def send_payload(self,payload):
@@ -713,18 +724,9 @@ class URCartTrajectory(object):
 
             #rot = self.quaternion2axisangle(p_ur_bl.orientation)
             rot = self.quaternion2axisangle(final_pose.orientation)
-            params = [MSG_MOVEL] + \
-                     [MULT_jointstate * movel_speed] + \
-                     [MULT_jointstate * p_ur_bl.position.x] + \
-                     [MULT_jointstate * p_ur_bl.position.y] + \
-                     [MULT_jointstate * p_ur_bl.position.z] + \
-                     [MULT_jointstate * rot[0]] + \
-                     [MULT_jointstate * rot[1]] + \
-                     [MULT_jointstate * rot[2]]
-            buf = struct.pack("!%ii" % len(params), *params)
-            #print params
-            with self.robot.socket_lock:
-                self.robot.request.send(buf)
+                            
+            self.robot.send_movel(movel_speed, p_ur_bl.position, rot)
+            
             while(self.robot.waypoint_id != 424):
                 time.sleep(IO_SLEEP_TIME)
             self.robot.waypoint_id = 0
