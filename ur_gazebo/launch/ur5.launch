@@ -27,6 +27,9 @@
   <!-- joint_group_position_controller -->
   <!--node name="joint_group_position_controller_spawner" pkg="controller_manager" type="spawner" args="joint_group_position_controller" /-->
   <!-- joint_group_velocity_controller -->
-  <node name="joint_group_velocity_controller_spawner" pkg="controller_manager" type="spawner" args="joint_group_velocity_controller" />
+  <!--node name="joint_group_velocity_controller_spawner" pkg="controller_manager" type="spawner" args="joint_group_velocity_controller" /-->
+  
+  <!-- control_mode_adapter -->
+  <node pkg="cob_control_mode_adapter" type="cob_control_mode_adapter_node" name="control_mode_adapter" cwd="node" respawn="false" output="screen"/>
 
 </launch>
