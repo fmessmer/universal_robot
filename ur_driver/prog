@@ -73,6 +73,7 @@ def driverProg():
       #do_brake = False
       
       # Executes the command
+      #send_out("foo")
       if do_brake:
         #stopj(1.0)  # TODO
         send_out("Braking")

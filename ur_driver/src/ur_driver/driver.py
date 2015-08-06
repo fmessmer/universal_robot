@@ -744,6 +744,7 @@ class URTrajectoryFollower(object):
 
             # Inserts the current setpoint at the head of the trajectory
             now = time.time()
+            self.init_traj_from_robot() #updates current state of the robot, i.e. sets self.traj to current state
             point0 = sample_traj(self.traj, now - self.traj_t0)
             point0.time_from_start = rospy.Duration(0.0)
             goal_handle.get_goal().trajectory.points.insert(0, point0)
@@ -819,7 +820,9 @@ class URTrajectoryFollower(object):
                     state = self.robot.get_joint_states()
                     position_in_tol = within_tolerance(state.position, last_point.positions, [0.1]*6)
                     velocity_in_tol = within_tolerance(state.velocity, last_point.velocities, [0.05]*6)
+                    #print "tick"
                     if position_in_tol and velocity_in_tol:
+                        print "succeeded"
                         # The arm reached the goal (and isn't moving).  Succeeding
                         self.goal_handle.set_succeeded()
                         self.goal_handle = None
