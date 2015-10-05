@@ -683,6 +683,12 @@ class URCartTrajectory(object):
         self.server.start()
         print "The cartesian action server for this driver has been started"
 
+    #HowTo:
+    # poses in goal_handle are expected to be given as any -> ee_link (NOT tool0)
+    # in the end, movel expects a pose base -> tool0
+    # ee_link -> tool0 is explicitly done via input_pose
+    # maybe a transform with frame_id and child_frame_id should be given in order to then lookup child_frame_id -> tool0 instead of hardcoding
+    # quaternion2axisangle only converts representation from quat to UR teach pendant Rx, Ry, Rz
     def execute_cb(self, goal_handle):
         log("ur_cart_as")
         self.cart_traj = goal_handle
@@ -722,7 +728,6 @@ class URCartTrajectory(object):
             final_pose = pm.toMsg( pm.fromMatrix(numpy.dot(m_ee,m_rot)) )
             movel_speed = goal_handle.velocity
 
-            #rot = self.quaternion2axisangle(p_ur_bl.orientation)
             rot = self.quaternion2axisangle(final_pose.orientation)
                             
             self.robot.send_movel(movel_speed, p_ur_bl.position, rot)
