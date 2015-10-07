@@ -76,6 +76,16 @@
         izz="${0.5 * mass * radius * radius}" />
     </inertial>
   </xacro:macro>
+  
+  <xacro:macro name="box_inertial" params="x y z mass *origin">
+    <inertial>
+      <mass value="${mass}" />
+      <insert_block name="origin" />
+      <inertia ixx="${0.0833333 * mass * (y*y + z*z)}" ixy="0.0" ixz="0.0"
+        iyy="${0.0833333 * mass * (x*x + z*z)}" iyz="0.0"
+        izz="${0.0833333 * mass * (x*x + y*y)}" />
+    </inertial>
+  </xacro:macro>
 
 
   <xacro:macro name="ur5_robot" params="prefix joint_limited">
@@ -304,12 +314,21 @@
     </joint>
 
     <link name="${prefix}ee_link">
+      <visual>
+        <geometry>
+          <box size="0.001 0.001 0.001"/>
+        </geometry>
+        <origin rpy="0 0 0" xyz="0.0005 0.0005 0.0005"/>
+      </visual>
       <collision>
         <geometry>
-          <box size="0.01 0.01 0.01"/>
+          <box size="0.001 0.001 0.001"/>
         </geometry>
-        <origin rpy="0 0 0" xyz="-0.01 0 0"/>
+        <origin rpy="0 0 0" xyz="0.0005 0.0005 0.0005"/>
       </collision>
+      <xacro:box_inertial x="0.001" y="0.001" z="0.001" mass="0.1">
+        <origin rpy="0 0 0" xyz="0.0005 0.0005 0.0005"/>
+      </xacro:box_inertial>
     </link>
 
     <xacro:ur5_arm_transmission prefix="${prefix}" />
